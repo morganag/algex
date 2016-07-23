@@ -1,0 +1,4 @@
+# algex
+
+Exploring symbolic algebra.
+
