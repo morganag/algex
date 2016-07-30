@@ -13,6 +13,8 @@ func TestString(t *testing.T) {
 		{v: D(0, 1), s: "0"},
 		{v: D(-3, 1), s: "-3"},
 		{v: S("x"), s: "x"},
+		{v: Sp("a", 0), s: "1"},
+		{v: Sp("w", -2), s: "w^-2"},
 	}
 	for i, x := range vs {
 		if s := x.v.String(); s != x.s {
@@ -25,15 +27,50 @@ func TestSimplify(t *testing.T) {
 	vs := []struct {
 		v []Value
 		s string
+		c string
 	}{
-		{v: Simplify(), s: "0"},
-		{v: Simplify(S("x"), S("y"), D(1, 3), S("a")), s: "1/3*a*x*y"},
-		{v: Simplify(D(3, 1), S("y"), D(1, 3), S("a")), s: "a*y"},
-		{v: Simplify(D(3, 1), D(-1, 6), S("a"), D(2, 1)), s: "-a"},
+		{
+			v: []Value{},
+			s: "0",
+			c: "0",
+		},
+		{
+			v: []Value{S("x"), S("y"), D(1, 3), S("a")},
+			s: "x*y*1/3*a",
+			c: "1/3*a*x*y",
+		},
+		{
+			v: []Value{D(3, 1), S("y"), D(1, 3), S("a")},
+			s: "3*y*1/3*a",
+			c: "a*y",
+		},
+		{
+			v: []Value{D(3, 1), D(-1, 6), S("a"), D(2, 1)},
+			s: "3*-1/6*a*2",
+			c: "-a",
+		},
+		{
+			v: []Value{D(3, 1), D(-1, 6), S("a"), D(2, 1), Sp("a", 2)},
+			s: "3*-1/6*a*2*a^2",
+			c: "-a^3",
+		},
+		{
+			v: []Value{D(3, 1), S("a"), S("a"), D(1, 3), Sp("a", -2)},
+			s: "3*a*a*1/3*a^-2",
+			c: "1",
+		},
+		{
+			v: []Value{D(3, 1), Sp("a", -1), S("a"), D(1, 3), Sp("a", 0)},
+			s: "3*a^-1*a*1/3*1",
+			c: "1",
+		},
 	}
 	for i, x := range vs {
 		if s := Prod(x.v...); s != x.s {
 			t.Errorf("[%d] got=%q want=%q", i, s, x.s)
+		}
+		if c := Prod(Simplify(x.v...)...); c != x.c {
+			t.Errorf("[%d] got=%q want=%q", i, c, x.c)
 		}
 	}
 }

@@ -2,6 +2,7 @@
 package factor
 
 import (
+	"fmt"
 	"math/big"
 	"sort"
 	"strings"
@@ -10,6 +11,8 @@ import (
 // Value captures a single factor. It is either a number or a symbol.
 type Value struct {
 	num *big.Rat
+
+	pow int
 	sym string
 }
 
@@ -19,7 +22,10 @@ func (v Value) String() string {
 		return v.num.RatString()
 	}
 	if v.sym != "" {
-		return v.sym
+		if v.pow == 1 {
+			return v.sym
+		}
+		return fmt.Sprintf("%s^%d", v.sym, v.pow)
 	}
 	return "<ERROR>"
 }
@@ -33,11 +39,6 @@ var one = big.NewRat(1, 1)
 // minusOne is a constant -one for comparisons.
 var minusOne = big.NewRat(-1, 1)
 
-// S converts a string into a symbol value.
-func S(sym string) Value {
-	return Value{sym: sym}
-}
-
 // R converts a rational value into a number value.
 func R(n *big.Rat) Value {
 	return Value{num: n}
@@ -48,6 +49,30 @@ func D(num, den int64) Value {
 	return Value{num: big.NewRat(num, den)}
 }
 
+// S converts a string into a symbol value.
+func S(sym string) Value {
+	return Value{sym: sym, pow: 1}
+}
+
+// Sp converts a string, power to a symbol value.
+func Sp(sym string, pow int) Value {
+	if pow == 0 {
+		return D(1, 1)
+	}
+	return Value{sym: sym, pow: pow}
+}
+
+type ByAlpha []Value
+
+func (a ByAlpha) Len() int      { return len(a) }
+func (a ByAlpha) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByAlpha) Less(i, j int) bool {
+	if a[i].sym < a[j].sym {
+		return true
+	}
+	return a[i].pow < a[j].pow
+}
+
 // Simplify condenses an unsorted array (product) of values into a
 // simplified (ordered) form.
 func Simplify(vs ...Value) []Value {
@@ -55,7 +80,7 @@ func Simplify(vs ...Value) []Value {
 		return nil
 	}
 
-	var syms []string
+	var syms []Value
 	n := big.NewRat(1, 1)
 	for _, v := range vs {
 		if v.num != nil {
@@ -65,13 +90,24 @@ func Simplify(vs ...Value) []Value {
 			n.Mul(n, v.num)
 			continue
 		}
-		syms = append(syms, v.sym)
+		syms = append(syms, v)
 	}
-	sort.Strings(syms)
+	sort.Sort(ByAlpha(syms))
 
 	res := []Value{R(n)}
 	for _, s := range syms {
-		res = append(res, S(s))
+		i := len(res) - 1
+		last := res[i]
+		if last.sym != s.sym {
+			res = append(res, s)
+			continue
+		}
+		last.pow += s.pow
+		if last.pow == 0 {
+			res = res[:i]
+			continue
+		}
+		res = append(res[:i], last)
 	}
 	return res
 }
