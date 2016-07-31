@@ -74,3 +74,54 @@ func TestSimplify(t *testing.T) {
 		}
 	}
 }
+
+func TestReplace(t *testing.T) {
+	vs := []struct {
+		a, b, c []Value
+		n       int
+		s       string
+	}{
+		{
+			a: []Value{Sp("a", 3)},
+			b: []Value{S("a")},
+			c: []Value{S("b")},
+			n: 3,
+			s: "b^3",
+		},
+		{
+			a: []Value{Sp("a", 3)},
+			b: []Value{Sp("a", 2)},
+			c: []Value{S("b")},
+			n: 1,
+			s: "a*b",
+		},
+		{
+			a: []Value{Sp("a", -3)},
+			b: []Value{S("a")},
+			c: []Value{S("b")},
+			n: 0,
+			s: "a^-3",
+		},
+		{
+			a: []Value{Sp("a", -3), Sp("b", -3)},
+			b: []Value{Sp("b", -2)},
+			c: []Value{S("b")},
+			n: 1,
+			s: "a^-3",
+		},
+		{
+			a: []Value{Sp("a", -3), Sp("b", -3)},
+			b: []Value{Sp("a", -1), Sp("b", -2)},
+			c: []Value{S("a")},
+			n: 1,
+			s: "a^-1*b^-1",
+		},
+	}
+	for i, v := range vs {
+		if n, x := Replace(v.a, v.b, v.c); n != v.n {
+			t.Errorf("[%d] expected %d replacements: got %d", i, v.n, n)
+		} else if s := Prod(x...); s != v.s {
+			t.Errorf("[%d] got=%q want=%q", i, s, v.s)
+		}
+	}
+}

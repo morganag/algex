@@ -147,3 +147,50 @@ func Segment(vs ...Value) (*big.Rat, []Value, string) {
 	x := Simplify(vs...)
 	return x[0].num, x[1:], Prod(x[1:]...)
 }
+
+// Replace replaces copies of b found in a with c. The number of times b
+// appeared in a is returned as well as the replaced array of factors.
+func Replace(a, b, c []Value) (int, []Value) {
+	pn, pf, _ := Segment(b...)
+	qf := Simplify(a...)
+	r := pn.Inv(pn)
+	n := 0
+	for len(pf) > 0 {
+		var nf []Value
+		i := 0
+		j := 0
+	GIVEUP:
+		for i < len(pf) && j < len(qf) {
+			t := pf[i]
+			for j < len(qf) {
+				u := qf[j]
+				j++
+				if u.num != nil || t.sym != u.sym {
+					nf = append(nf, u)
+					continue
+				}
+				if t.pow*u.pow < 0 {
+					// Same symbol, but we require that
+					// the sign of the power is the same.
+					break GIVEUP
+				}
+				np := u.pow - t.pow
+				if np*t.pow < 0 {
+					break GIVEUP
+				}
+				if np != 0 {
+					nf = append(nf, Sp(t.sym, np))
+				}
+				i++
+				break
+			}
+		}
+		if i != len(pf) {
+			break
+		}
+		// Whole match found.
+		qf = Simplify(append(append(nf, qf[j:]...), append(c, R(r))...)...)
+		n++
+	}
+	return n, qf
+}

@@ -40,6 +40,7 @@ func (e *Exp) String() string {
 	for x := range e.terms {
 		s = append(s, x)
 	}
+	// TODO: might want to prefer a non-ascii sorted expression.
 	sort.Strings(s)
 	for i, x := range s {
 		f := e.terms[x]
