@@ -74,3 +74,25 @@ func TestAddSub(t *testing.T) {
 		}
 	}
 }
+
+func TestMul(t *testing.T) {
+	a := NewExp([]Value{Sp("a", 3)}, []Value{Sp("b", 4)})
+	b := NewExp([]Value{Sp("a", 3)}, []Value{Sp("b", 4), D(-1, 1)})
+	c := NewExp([]Value{Sp("a", 6)}, []Value{Sp("b", 8)})
+
+	vs := []struct {
+		e *Exp
+		s string
+	}{
+		{e: Mul(a, a), s: "2*a^3*b^4+a^6+b^8"},
+		{e: Mul(b, b), s: "-2*a^3*b^4+a^6+b^8"},
+		{e: Mul(a, b), s: "a^6-b^8"},
+		{e: Mul(b, a), s: "a^6-b^8"},
+		{e: Mul(b, a, c), s: "a^12-b^16"},
+	}
+	for i, v := range vs {
+		if s := v.e.String(); s != v.s {
+			t.Errorf("[%d] got=%q want=%q", i, s, v.s)
+		}
+	}
+}

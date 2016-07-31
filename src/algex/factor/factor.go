@@ -39,9 +39,10 @@ var one = big.NewRat(1, 1)
 // minusOne is a constant -one for comparisons.
 var minusOne = big.NewRat(-1, 1)
 
-// R converts a rational value into a number value.
+// R copies a rational value into a number value.
 func R(n *big.Rat) Value {
-	return Value{num: n}
+	c := &big.Rat{}
+	return Value{num: c.Set(n)}
 }
 
 // D converts two integers to a rational number value.
@@ -69,6 +70,9 @@ func (a ByAlpha) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByAlpha) Less(i, j int) bool {
 	if a[i].sym < a[j].sym {
 		return true
+	}
+	if a[i].sym > a[j].sym {
+		return false
 	}
 	// Higher powers first (after simplify this is moot).
 	return a[i].pow > a[j].pow

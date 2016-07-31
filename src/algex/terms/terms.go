@@ -104,3 +104,26 @@ func Sub(a, b *Exp) *Exp {
 	}
 	return e
 }
+
+// Mul computes the product of a series of expressions.
+func Mul(as ...*Exp) *Exp {
+	var e *Exp
+	for i, a := range as {
+		if i == 0 {
+			e = Add(a)
+			continue
+		}
+		f := &Exp{
+			terms: make(map[string]term),
+		}
+		for _, p := range a.terms {
+			for _, q := range e.terms {
+				x := []factor.Value{factor.R(p.coeff), factor.R(q.coeff)}
+				n, fs, s := factor.Segment(append(x, append(p.fact, q.fact...)...)...)
+				f.insert(n, fs, s)
+			}
+		}
+		e = f
+	}
+	return e
+}
