@@ -21,6 +21,9 @@ type Exp struct {
 
 // String represents an expression of terms as a string.
 func (e *Exp) String() string {
+	if len(e.terms) == 0 {
+		return "0"
+	}
 	var s []string
 	for x := range e.terms {
 		s = append(s, x)
@@ -56,7 +59,11 @@ func NewExp(ts ...[]factor.Value) *Exp {
 		}
 		// Combine with existing term.
 		old.coeff = n.Add(n, e.terms[s].coeff)
-		e.terms[s] = old
+		if old.coeff.Cmp(&big.Rat{}) == 0 {
+			delete(e.terms, s)
+		} else {
+			e.terms[s] = old
+		}
 	}
 	return e
 }
