@@ -70,7 +70,8 @@ func (a ByAlpha) Less(i, j int) bool {
 	if a[i].sym < a[j].sym {
 		return true
 	}
-	return a[i].pow < a[j].pow
+	// Higher powers first (after simplify this is moot).
+	return a[i].pow > a[j].pow
 }
 
 // Simplify condenses an unsorted array (product) of values into a

@@ -51,3 +51,27 @@ func TestNewExp(t *testing.T) {
 		}
 	}
 }
+
+func TestAddSub(t *testing.T) {
+	a := NewExp([]Value{Sp("a", 3), D(1, 3)},
+		[]Value{D(2, 3), Sp("a", 3)},
+		[]Value{Sp("a", -1)})
+	b := NewExp([]Value{Sp("b", 5), D(1, 3)},
+		[]Value{Sp("a", -1)})
+	vs := []struct {
+		e *Exp
+		s string
+	}{
+		{e: a, s: "a^-1+a^3"},
+		{e: Add(a, a), s: "2*a^-1+2*a^3"},
+		{e: Sub(a, a), s: "0"},
+		{e: Sub(a, Add(a, a)), s: "-a^-1-a^3"},
+		{e: Sub(a, b), s: "a^3-1/3*b^5"},
+	}
+	for i, v := range vs {
+		t.Logf("[%d] -> %q", i, v.e)
+		if s := v.e.String(); s != v.s {
+			t.Errorf("[%d] got=%q want=%q", i, s, v.s)
+		}
+	}
+}
