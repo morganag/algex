@@ -134,3 +134,11 @@ func Prod(vs ...Value) string {
 	}
 	return prefix + strings.Join(x, "*")
 }
+
+// Segment simplifies a set of factors and returns the numerical
+// coefficient, the non-numeric array of factors and a string
+// representation of this array of non-numeric factors.
+func Segment(vs ...Value) (*big.Rat, []Value, string) {
+	x := Simplify(vs...)
+	return x[0].num, x[1:], Prod(x[1:]...)
+}
