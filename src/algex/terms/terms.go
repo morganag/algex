@@ -128,3 +128,35 @@ func Mul(as ...*Exp) *Exp {
 	}
 	return e
 }
+
+// Substitute replaces each occurrence of b in an expression with the expression c.
+func Substitute(e *Exp, b []factor.Value, c *Exp) *Exp {
+	s := [][]factor.Value{}
+	for _, t := range c.terms {
+		s = append(s, append([]factor.Value{factor.R(t.coeff)}, t.fact...))
+	}
+	for {
+		again := false
+		f := &Exp{
+			terms: make(map[string]term),
+		}
+		for _, x := range e.terms {
+			a := append([]factor.Value{factor.R(x.coeff)}, x.fact...)
+			for _, t := range s {
+				hit, y := factor.Replace(a, b, t, 1)
+				n, fs, tag := factor.Segment(y...)
+				f.insert(n, fs, tag)
+				if hit == 0 {
+					// If nothing substituted, then only insert once.
+					break
+				}
+				again = true
+			}
+		}
+		e = f
+		if !again {
+			break
+		}
+	}
+	return e
+}

@@ -96,3 +96,30 @@ func TestMul(t *testing.T) {
 		}
 	}
 }
+
+func TestSubstitute(t *testing.T) {
+	vs := []struct {
+		e, c *Exp
+		b    []Value
+		s    string
+	}{
+		{
+			e: NewExp([]Value{S("a"), S("y")}),
+			b: []Value{S("y")},
+			c: NewExp([]Value{S("a")}, []Value{D(-1, 1), Sp("b", 2), Sp("a", -1)}),
+			s: "a^2-b^2",
+		},
+		{
+			e: NewExp([]Value{Sp("a", 2)}),
+			b: []Value{S("a")},
+			c: NewExp([]Value{S("b")}, []Value{D(-1, 1), S("c")}),
+			s: "-2*b*c+b^2+c^2",
+		},
+	}
+	for i, v := range vs {
+		r := Substitute(v.e, v.b, v.c)
+		if s := r.String(); s != v.s {
+			t.Errorf("[%d] %q (%q -> %q) got=%q want=%q", i, v.e, Prod(v.b...), v.c, s, v.s)
+		}
+	}
+}

@@ -118,7 +118,7 @@ func TestReplace(t *testing.T) {
 		},
 	}
 	for i, v := range vs {
-		if n, x := Replace(v.a, v.b, v.c); n != v.n {
+		if n, x := Replace(v.a, v.b, v.c, 0); n != v.n {
 			t.Errorf("[%d] expected %d replacements: got %d", i, v.n, n)
 		} else if s := Prod(x...); s != v.s {
 			t.Errorf("[%d] got=%q want=%q", i, s, v.s)

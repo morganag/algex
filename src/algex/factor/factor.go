@@ -150,12 +150,12 @@ func Segment(vs ...Value) (*big.Rat, []Value, string) {
 
 // Replace replaces copies of b found in a with c. The number of times b
 // appeared in a is returned as well as the replaced array of factors.
-func Replace(a, b, c []Value) (int, []Value) {
+func Replace(a, b, c []Value, max int) (int, []Value) {
 	pn, pf, _ := Segment(b...)
 	qf := Simplify(a...)
 	r := pn.Inv(pn)
 	n := 0
-	for len(pf) > 0 {
+	for len(pf) > 0 && (max <= 0 || n < max) {
 		var nf []Value
 		i := 0
 		j := 0
