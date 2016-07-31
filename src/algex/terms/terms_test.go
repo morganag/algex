@@ -69,7 +69,6 @@ func TestAddSub(t *testing.T) {
 		{e: Sub(a, b), s: "a^3-1/3*b^5"},
 	}
 	for i, v := range vs {
-		t.Logf("[%d] -> %q", i, v.e)
 		if s := v.e.String(); s != v.s {
 			t.Errorf("[%d] got=%q want=%q", i, s, v.s)
 		}
