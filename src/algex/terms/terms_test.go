@@ -115,6 +115,12 @@ func TestSubstitute(t *testing.T) {
 			c: NewExp([]Value{S("b")}, []Value{D(-1, 1), S("c")}),
 			s: "-2*b*c+b^2+c^2",
 		},
+		{
+			e: NewExp([]Value{Sp("a", 2)}, []Value{Sp("b", 2)}),
+			b: []Value{S("a")},
+			c: NewExp(), // Zero.
+			s: "b^2",
+		},
 	}
 	for i, v := range vs {
 		r := Substitute(v.e, v.b, v.c)
