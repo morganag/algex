@@ -16,6 +16,16 @@ type Value struct {
 	sym string
 }
 
+// IsNum indicates that v is a rational number.
+func (v Value) IsNum() bool {
+	return v.num != nil
+}
+
+// Num simply returns the num value of the term.
+func (v Value) Num() *big.Rat {
+	return v.num
+}
+
 // String displays a single factor.
 func (v Value) String() string {
 	if v.num != nil {

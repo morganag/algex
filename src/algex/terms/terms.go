@@ -108,6 +108,26 @@ func Sub(a, b *Exp) *Exp {
 	return e
 }
 
+// Mod takes a numerical factor and eliminates obvious multiples of it
+// from an expression.
+func (e *Exp) Mod(x factor.Value) *Exp {
+	if !x.IsNum() {
+		return e
+	}
+	r := big.NewRat(1, 1)
+	inv := r.Inv(x.Num())
+	a := &Exp{terms: make(map[string]term)}
+	for s, v := range e.terms {
+		t := big.NewRat(1, 1)
+		d := t.Mul(v.coeff, inv)
+		if d.IsInt() {
+			continue
+		}
+		a.terms[s] = v
+	}
+	return a
+}
+
 // Mul computes the product of a series of expressions.
 func Mul(as ...*Exp) *Exp {
 	var e *Exp
