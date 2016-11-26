@@ -148,3 +148,19 @@ func TestMod(t *testing.T) {
 		}
 	}
 }
+
+func TestContains(t *testing.T) {
+	vs := []struct {
+		sym  string
+		e    *Exp
+		want bool
+	}{
+		{sym: "x", e: NewExp([]Value{D(1, 4), Sp("x", 3)}), want: true},
+		{sym: "y", e: NewExp([]Value{D(1, 4), Sp("x", 3)}), want: false},
+	}
+	for i, v := range vs {
+		if got := v.e.Contains([]Value{S(v.sym)}); got != v.want {
+			t.Errorf("[%d] exp=%q contains %q: got=%v, want=%v", i, v.e, v.sym, got, v.want)
+		}
+	}
+}

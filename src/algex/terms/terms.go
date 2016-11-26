@@ -204,3 +204,15 @@ func Substitute(e *Exp, b []factor.Value, c *Exp) *Exp {
 	}
 	return e
 }
+
+// Contains investigates an expression for the presence of a term, b.
+func (e *Exp) Contains(b []factor.Value) bool {
+	z := []factor.Value{factor.R(&big.Rat{})} // Zero.
+	for _, x := range e.terms {
+		a := append([]factor.Value{factor.R(x.coeff)}, x.fact...)
+		if hit, _ := factor.Replace(a, b, z, 1); hit != 0 {
+			return true
+		}
+	}
+	return false
+}
