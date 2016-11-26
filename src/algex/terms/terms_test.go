@@ -1,8 +1,9 @@
 package terms
 
 import (
-	. "algex/factor"
 	"testing"
+
+	. "algex/factor"
 )
 
 func TestNewExp(t *testing.T) {

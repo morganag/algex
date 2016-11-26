@@ -33,7 +33,9 @@ func NewExp(ts ...[]factor.Value) *Exp {
 
 // String represents an expression of terms as a string.
 func (e *Exp) String() string {
-	if len(e.terms) == 0 {
+	if e == nil {
+		return "0"
+	} else if len(e.terms) == 0 {
 		return "0"
 	}
 	var s []string
