@@ -91,3 +91,41 @@ func (m *Matrix) Mul(n *Matrix) (*Matrix, error) {
 	}
 	return a, nil
 }
+
+// Mx multiplies two matrices and panics on error.
+func (m *Matrix) Mx(n *Matrix) *Matrix {
+	a, err := m.Mul(n)
+	if err != nil {
+		panic(err)
+	}
+	return a
+}
+
+// Sum adds two matrices.
+func (m *Matrix) Sum(n *Matrix, scale *terms.Exp) (*Matrix, error) {
+	if m.rows != n.rows || m.cols != n.cols {
+		return nil, fmt.Errorf("inequivalent dimensions %dx%d != %dx%d", m.rows, m.cols, n.rows, n.cols)
+	}
+	a, _ := NewMatrix(m.rows, m.cols)
+	for r := 0; r < m.rows; r++ {
+		for c := 0; c < m.cols; c++ {
+			if q := n.El(r, c); q == nil {
+				a.Set(r, c, m.El(r, c))
+			} else if p := m.El(r, c); p == nil {
+				a.Set(r, c, terms.Mul(q, scale))
+			} else {
+				a.Set(r, c, terms.Add(p, terms.Mul(q, scale)))
+			}
+		}
+	}
+	return a, nil
+}
+
+// Add adds two matrices, and panics on error.
+func (m *Matrix) Add(n *Matrix, scale *terms.Exp) *Matrix {
+	a, err := m.Sum(n, scale)
+	if err != nil {
+		panic(err)
+	}
+	return a
+}

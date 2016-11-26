@@ -43,3 +43,22 @@ func TestMul(t *testing.T) {
 		t.Errorf("matrix multiply %v*%v: got=%v, want=%v", a, b, got, want)
 	}
 }
+
+func TestSum(t *testing.T) {
+	a := terms.NewExp([]factor.Value{factor.D(-2, 3), factor.Sp("x", -1)})
+	b := terms.NewExp([]factor.Value{factor.D(9, 4), factor.Sp("x", 2)})
+
+	p, _ := NewMatrix(1, 2)
+	p.Set(0, 0, a)
+	q, _ := NewMatrix(1, 2)
+	q.Set(0, 0, a)
+	q.Set(0, 1, b)
+
+	r, err := p.Sum(q, terms.Mul(a, a))
+	if err != nil {
+		t.Fatalf("can't sum things: %v", err)
+	}
+	if got, want := r.String(), "[[-2/3*x^-1-8/27*x^-3, 1]]"; got != want {
+		t.Errorf("add: got=%q, want=%q", got, want)
+	}
+}
