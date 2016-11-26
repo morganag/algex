@@ -130,3 +130,21 @@ func TestSubstitute(t *testing.T) {
 		}
 	}
 }
+
+func TestMod(t *testing.T) {
+	three := D(3, 1)
+	for i := int64(-3); i < 7; i++ {
+		a := NewExp([]Value{D(i, 1), S("x")})
+		e := (i + 9) % 3
+		want := "0"
+		switch e {
+		case 1:
+			want = "x"
+		case 2:
+			want = "2*x"
+		}
+		if got := a.Mod(three).String(); got != want {
+			t.Errorf("[%d] -> a=%q (a mod 3 =) got:%q, want: %q", i, a, a.Mod(three), want)
+		}
+	}
+}

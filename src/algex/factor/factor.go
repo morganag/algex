@@ -155,6 +155,9 @@ func Prod(vs ...Value) string {
 // representation of this array of non-numeric factors.
 func Segment(vs ...Value) (*big.Rat, []Value, string) {
 	x := Simplify(vs...)
+	if len(x) == 0 {
+		return nil, nil, ""
+	}
 	return x[0].num, x[1:], Prod(x[1:]...)
 }
 

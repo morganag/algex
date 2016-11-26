@@ -26,6 +26,9 @@ func NewExp(ts ...[]factor.Value) *Exp {
 	}
 	for _, t := range ts {
 		n, fs, s := factor.Segment(t...)
+		if n == nil {
+			continue
+		}
 		e.insert(n, fs, s)
 	}
 	return e
@@ -108,22 +111,33 @@ func Sub(a, b *Exp) *Exp {
 	return e
 }
 
-// Mod takes a numerical factor and eliminates obvious multiples of it
-// from an expression.
+// Mod takes a numerical integer factor and eliminates obvious
+// multiples of it from an expression. No attempt is made to
+// simplify non-integer fractions.
 func (e *Exp) Mod(x factor.Value) *Exp {
-	if !x.IsNum() {
+	if !x.IsNum() || !x.Num().IsInt() {
 		return e
 	}
-	r := big.NewRat(1, 1)
-	inv := r.Inv(x.Num())
+	zero := &big.Int{}
 	a := &Exp{terms: make(map[string]term)}
 	for s, v := range e.terms {
-		t := big.NewRat(1, 1)
-		d := t.Mul(v.coeff, inv)
-		if d.IsInt() {
+		if !v.coeff.IsInt() {
+			a.terms[s] = v
 			continue
 		}
-		a.terms[s] = v
+		t := big.NewInt(1)
+		u := big.NewInt(1)
+		_, d := t.DivMod(v.coeff.Num(), x.Num().Num(), u)
+		if d.Cmp(zero) == 0 {
+			// Drop this term since it is a multiple of x.
+			continue
+		}
+		r := &big.Rat{}
+		r.SetInt(u)
+		a.terms[s] = term{
+			coeff: r,
+			fact:  v.fact,
+		}
 	}
 	return a
 }
