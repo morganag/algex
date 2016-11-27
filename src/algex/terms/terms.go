@@ -111,6 +111,8 @@ func Sub(a, b *Exp) *Exp {
 	return e
 }
 
+var zero = []factor.Value{factor.R(&big.Rat{})}
+
 // Mod takes a numerical integer factor and eliminates obvious
 // multiples of it from an expression. No attempt is made to
 // simplify non-integer fractions.
@@ -118,7 +120,7 @@ func (e *Exp) Mod(x factor.Value) *Exp {
 	if !x.IsNum() || !x.Num().IsInt() {
 		return e
 	}
-	zero := &big.Int{}
+	z := &big.Int{} // Zero
 	a := &Exp{terms: make(map[string]term)}
 	for s, v := range e.terms {
 		if !v.coeff.IsInt() {
@@ -128,7 +130,7 @@ func (e *Exp) Mod(x factor.Value) *Exp {
 		t := big.NewInt(1)
 		u := big.NewInt(1)
 		_, d := t.DivMod(v.coeff.Num(), x.Num().Num(), u)
-		if d.Cmp(zero) == 0 {
+		if d.Cmp(z) == 0 {
 			// Drop this term since it is a multiple of x.
 			continue
 		}
@@ -171,7 +173,6 @@ func Substitute(e *Exp, b []factor.Value, c *Exp) *Exp {
 	for _, t := range c.terms {
 		s = append(s, append([]factor.Value{factor.R(t.coeff)}, t.fact...))
 	}
-	z := []factor.Value{factor.R(&big.Rat{})} // Zero.
 	for {
 		again := false
 		f := &Exp{
@@ -179,7 +180,7 @@ func Substitute(e *Exp, b []factor.Value, c *Exp) *Exp {
 		}
 		for _, x := range e.terms {
 			a := append([]factor.Value{factor.R(x.coeff)}, x.fact...)
-			hit, y := factor.Replace(a, b, z, 1)
+			hit, y := factor.Replace(a, b, zero, 1)
 			if hit == 0 {
 				n, fs, tag := factor.Segment(y...)
 				f.insert(n, fs, tag)
@@ -207,12 +208,26 @@ func Substitute(e *Exp, b []factor.Value, c *Exp) *Exp {
 
 // Contains investigates an expression for the presence of a term, b.
 func (e *Exp) Contains(b []factor.Value) bool {
-	z := []factor.Value{factor.R(&big.Rat{})} // Zero.
 	for _, x := range e.terms {
 		a := append([]factor.Value{factor.R(x.coeff)}, x.fact...)
-		if hit, _ := factor.Replace(a, b, z, 1); hit != 0 {
+		if hit, _ := factor.Replace(a, b, zero, 1); hit != 0 {
 			return true
 		}
 	}
 	return false
+}
+
+// AsNumber ignores all terms that contain symbols, and just returns
+// the value of the constant term. The boolean is true only when there
+// are no non-constant terms.
+func (e *Exp) AsNumber() (*big.Rat, bool) {
+	ok := e == nil
+	if !ok {
+		for _, t := range e.terms {
+			if len(t.fact) == 0 {
+				return t.coeff, true
+			}
+		}
+	}
+	return zero[0].Num(), ok
 }
