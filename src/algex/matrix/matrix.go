@@ -129,3 +129,14 @@ func (m *Matrix) Add(n *Matrix, scale *terms.Exp) *Matrix {
 	}
 	return a
 }
+
+// Performs a substitution on all elements of a matrix.
+func (m *Matrix) Substitute(b []factor.Value, s *terms.Exp) *Matrix {
+	n, _ := NewMatrix(m.rows, m.cols)
+	for r := 0; r < m.rows; r++ {
+		for c := 0; c < m.cols; c++ {
+			n.Set(r, c, terms.Substitute(m.El(r, c), b, s))
+		}
+	}
+	return n
+}

@@ -4,3 +4,4 @@ tests:
 	go test algex/factor
 	go test algex/terms
 	go test algex/matrix
+	go test algex/rotation
